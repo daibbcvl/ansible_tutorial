@@ -24,3 +24,6 @@ ansible all  -m gather_facts | grep ansible_distribution
 ```shell
 cat /etc/passwd
 ```
+
+- More info about role, go here: [https://www.youtube.com/watch?v=tq9sCeQNVYc]
+- Using role to separate play book tasks into task books
