@@ -1,0 +1,31 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    #    - name: Update repository index
+    #      apt:
+    #        update_cache: true
+    #      when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "22.10"
+    - name: install apache2 package
+      package:
+        name:
+          - "{{ apache_package }}"
+          - "{{ php_package }}"
+        state: latest
+        update_cache: yes
+
+    - name: Copy default html file for site
+      tags: apache, apache2, httpd
+      copy:
+        src: default_site.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Start apache
+      tags: apache
+      service:
+        name: apache2
+        state: started

@@ -1,0 +1,71 @@
+---
+  - hosts: all
+    become: true
+
+    tasks:
+  #    - name: Update repository index
+  #      apt:
+  #        update_cache: true
+  #      when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "22.10"
+      - name: install apache2 package
+        package:
+          name:
+            - "{{ apache_package }}"
+            - "{{ php_package }}"
+          state: latest
+          update_cache: yes
+
+      - name: Copy default html file for site
+        tags: apache, apache2, httpd
+        copy:
+          src: default_site.html
+          dest: /var/www/html/index.html
+          owner: root
+          group: root
+          mode: 0644
+
+      - name: Start apache
+        tags: apache
+        service:
+          name: apache2
+          state: started
+  #    - name: Global configuration to Global configuration 123
+  #      tags: apache, centos, httpd
+  #      lineinfile:
+  #        path: /etc/apache2/apache2.conf
+  #        regexp: '^Global configuration'
+  #        line: '#Global configuration Global configuration 12345678'
+  #      register: apacheModify
+  #
+  #    - name: Restart apache
+  #      tags: apache
+  #      service:
+  #        name: apache2
+  #        state: restarted
+  #      when: apacheModify.changed
+
+      - name: create test user to root group
+        tags: always
+        user:
+          name: test
+          groups: root
+
+      - name: add ssh key for user test
+        tags: always
+        authorized_key:
+          user: test
+          key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDThJZoK7UVZIGiCf5jxra6MkZtJfqAGrzEre4d7A7/TtSz8PTqVBZ2kAh/zsZIG8fHdxPrNgyzm81pWvbNvYPEuVaetM5qh1AH1JKkSATaFqPr0lFro4Ay0jPdPzh3iY7ejwfW97itDcBhrb0s9aD+OHUYNOsZvFx0cE/ned4ZK+qojXpOylua1rewGC7tSKsIrJ8bL2+pLGucvGrdrlXQrVIy3svamBcqi5Qdqs7yt28gkSGZ5l9Jno4J5Y10+ttew4kgaNxmznzqdU9mQYc4ubj7YglV5ZCpH7rxP4TMweTdb/6lJGLZz/B99bqE8HcIODrS48csawc1K6y++FpIz+VrgznqX0V1l2mMp6Xnqxd47MHCu67KnpRca4Y6ygkiSWC1EdWSJim/8y3cp/aYzR3M5ipzjBGmVjPZtS8nsifSX8VJS1JyyhZaLXRiFlIUIUeTzO7hlnfN5a5zbUCf2CE/hNPrrhOfpvjrJHzF6UxL/S9+e2qkcmTpNl9K1wM= ansible"
+      - name: add sudoers file for test user
+        tags: always
+        copy:
+          src: sudoer_test
+          dest: /etc/sudoers.d/test
+          owner: root
+          group: root
+          mode: 0440
+  ##### Setup for group digital_ocean
+  - hosts: digital_ocean
+    become: true
+    # Doing something with this group
+  ### Setup for another group sever
+

@@ -1,1 +1,7 @@
-68.183.231.17 ansible_user=root
+digital_ocean:
+  hosts:
+    68.183.231.17:
+      #ansible_user: root
+      apache_package: apache2
+      php_package: libapache2-mod-php
+#68.183.231.17 ansible_user=root

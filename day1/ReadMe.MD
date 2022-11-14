@@ -15,3 +15,12 @@ ansible all -m gather_facts -i inventory
 ```shell
 ansible all -m ping
 ```
+
+- Check distribution
+```shell
+ansible all  -m gather_facts | grep ansible_distribution
+```
+- View list user in linux
+```shell
+cat /etc/passwd
+```
