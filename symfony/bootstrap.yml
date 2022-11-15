@@ -1,0 +1,109 @@
+---
+- hosts: all
+  become: true
+
+  vars:
+    server_name: meme-group.com
+    symfony_root_dir: /var/www/project
+    symfony_web_dir: "{{ symfony_root_dir }}/web"
+
+  tasks:
+
+    - name: Installation install software-properties-common
+      apt: name=software-properties-common
+
+    - name: "Repo PHP 8.1"
+      apt_repository:
+        repo="ppa:ondrej/php"
+
+    - name: "Updating the repo"
+      apt: update_cache=yes
+
+    - name: Installation PHP 8.1
+      apt: name=php8.1 state=present
+
+
+    - name: Install php8 extensions
+      script: scripts/php8_extensions.sh
+
+    - name: "install nginx"
+      apt:
+        name: [ 'nginx' ]
+        state: latest
+    - name: Add Symfony config template to the Nginx available sites
+      become: true
+      template:
+        src: templates/symfony.conf
+        dest: "/etc/nginx/sites-available/{{ server_name }}.conf"
+    - name: Remove default nginx config
+      file:
+        state: absent
+        path: /etc/nginx/sites-enabled/default
+
+    - name: Enable Symfony config template from Nginx available sites
+      become: true
+      file:
+        src: "/etc/nginx/sites-available/{{ server_name }}.conf"
+        dest: "/etc/nginx/sites-enabled/{{ server_name }}.conf"
+        state: link
+    - name: Add enabled Nginx site to /etc/hosts
+      become: true
+      lineinfile:
+        dest: /etc/hosts
+        regexp: "{{ server_name }}"
+        line: "127.0.0.1 {{ server_name }}"
+
+    - name: Remove default nginx config
+      file:
+        state: absent
+        path: /etc/nginx/sites-enabled/default
+
+    - name: Install MySQL DB server
+      become: true
+      apt:
+        name: mysql-server
+        state: latest
+
+    - name: Create project directory and set its permissions
+      become: true
+      file:
+        path: "{{symfony_web_dir}}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "root"
+        recurse: yes
+
+
+    - name: Clone from project repo
+      git:
+        repo: https://github.com/daibbcvl/symfony-phpstan.git
+        dest: "{{symfony_web_dir}}"
+        force: yes
+        accept_hostkey: yes
+        key_file: "keys/ansible"
+      become: yes
+      become_user: "{{ ansible_user }}"
+
+    - name: Download Composer
+      script: scripts/install_composer.sh
+    - name: Move Composer globally
+      become: true
+      command: mv composer.phar /usr/local/bin/composer
+    - name: Set permissions on Composer
+      become: true
+      file:
+        path: /usr/local/bin/composer
+        mode: "a+x"
+
+    - name: Composer install
+      composer:
+        command: install
+        working_dir: "{{symfony_web_dir}}"
+      become: yes
+      become_user: "ansible"
+      ignore_errors: yes
+      #notify: Restart nginx
+
+  handlers:
+#    - name: Restart nginx
+#      service: name=nginx state=restarted

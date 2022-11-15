@@ -1,0 +1,40 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Installation install software-properties-common
+      apt: name=software-properties-common
+
+    - name: "Repo PHP 8.1"
+      apt_repository:
+        repo="ppa:ondrej/php"
+
+    - name: "Updating the repo"
+      apt: update_cache=yes
+
+    - name: Installation PHP 8.1
+      apt: name=php8.1 state=present
+
+
+    - name: Install php8 extensions
+      script: scripts/php8_extensions.sh
+#    - name: install php extension stack
+#      apt:
+#        pkg:
+#          - php8.1-xml
+#          - php8.1-dom
+#          - php8.1-mysql
+#          - php8.1-curl
+#          - php8.1-json
+#          - php8.1-cgi
+#          - php8.1-xsl
+#          - php8.1-cgi
+#          - php8.1-gd
+#          - php8.1-mbstring
+#          - php8.1-zip
+#          - php8.1-xmlrpc
+#          - php8.1-soap
+#          - php8.1-intl
+#        state: present
+#        update_cache: yes

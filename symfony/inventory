@@ -1,0 +1,5 @@
+digital_ocean:
+  hosts:
+    68.183.231.17:
+      ansible_user: ansible
+#68.183.231.17 ansible_user=root

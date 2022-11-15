@@ -1,0 +1,26 @@
+---
+- hosts: all
+  become: true
+  tasks:
+
+    - name: create ansible user to root group
+      tags: always
+      user:
+        name: ansible
+        groups: root
+
+    - name: add ssh key for user ansible
+      tags: always
+      authorized_key:
+        user: ansible
+        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDThJZoK7UVZIGiCf5jxra6MkZtJfqAGrzEre4d7A7/TtSz8PTqVBZ2kAh/zsZIG8fHdxPrNgyzm81pWvbNvYPEuVaetM5qh1AH1JKkSATaFqPr0lFro4Ay0jPdPzh3iY7ejwfW97itDcBhrb0s9aD+OHUYNOsZvFx0cE/ned4ZK+qojXpOylua1rewGC7tSKsIrJ8bL2+pLGucvGrdrlXQrVIy3svamBcqi5Qdqs7yt28gkSGZ5l9Jno4J5Y10+ttew4kgaNxmznzqdU9mQYc4ubj7YglV5ZCpH7rxP4TMweTdb/6lJGLZz/B99bqE8HcIODrS48csawc1K6y++FpIz+VrgznqX0V1l2mMp6Xnqxd47MHCu67KnpRca4Y6ygkiSWC1EdWSJim/8y3cp/aYzR3M5ipzjBGmVjPZtS8nsifSX8VJS1JyyhZaLXRiFlIUIUeTzO7hlnfN5a5zbUCf2CE/hNPrrhOfpvjrJHzF6UxL/S9+e2qkcmTpNl9K1wM= ansible"
+    - name: add sudoers file for ansible user
+      tags: always
+      copy:
+        src: sudoer_ansible
+        dest: /etc/sudoers.d/ansible
+        owner: root
+        group: root
+        mode: 0440
+
+
