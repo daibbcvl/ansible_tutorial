@@ -8,6 +8,13 @@
     symfony_web_dir: "{{ symfony_root_dir }}/web"
 
   tasks:
+    - name: update
+      apt: update_cache=yes
+
+    - name: Install Nginx
+      apt: name=nginx state=latest
+      notify:
+        - restart nginx
 
     - name: Installation install software-properties-common
       apt: name=software-properties-common
@@ -19,17 +26,11 @@
     - name: "Updating the repo"
       apt: update_cache=yes
 
-    - name: Installation PHP 8.1
-      apt: name=php8.1 state=present
-
-
     - name: Install php8 extensions
       script: scripts/php8_extensions.sh
+      notify:
+        - restart nginx
 
-    - name: "install nginx"
-      apt:
-        name: [ 'nginx' ]
-        state: latest
     - name: Add Symfony config template to the Nginx available sites
       become: true
       template:
@@ -102,8 +103,7 @@
       become: yes
       become_user: "ansible"
       ignore_errors: yes
-      #notify: Restart nginx
 
   handlers:
-#    - name: Restart nginx
-#      service: name=nginx state=restarted
+    - name: restart nginx
+      service: name=nginx state=reloaded
